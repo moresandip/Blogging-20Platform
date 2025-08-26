@@ -12,8 +12,21 @@ export interface DemoResponse {
 }
 
 /**
- * Blog-related types
+ * User and Authentication types
  */
+export interface User {
+  id: number;
+  name: string;
+  email: string;
+  avatar: string;
+  bio: string;
+  role: "admin" | "user";
+  followers?: number;
+  articles?: number;
+  createdAt: string;
+  updatedAt?: string;
+}
+
 export interface Author {
   id: number;
   name: string;
@@ -21,6 +34,32 @@ export interface Author {
   bio: string;
   followers?: number;
   articles?: number;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
+}
+
+export interface RegisterRequest {
+  name: string;
+  email: string;
+  password: string;
+  bio?: string;
+}
+
+export interface AuthResponse {
+  user: User;
+  token: string;
+  message: string;
+}
+
+export interface CreateUserRequest {
+  name: string;
+  email: string;
+  password: string;
+  role: "admin" | "user";
+  bio?: string;
 }
 
 export interface Comment {
@@ -106,4 +145,23 @@ export interface ApiError {
   error: string;
   message: string;
   statusCode: number;
+}
+
+/**
+ * User Management Response types
+ */
+export interface UserListResponse {
+  users: User[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AdminStatsResponse {
+  totalUsers: number;
+  totalPosts: number;
+  totalComments: number;
+  totalLikes: number;
+  recentUsers: User[];
+  recentPosts: BlogPost[];
 }
