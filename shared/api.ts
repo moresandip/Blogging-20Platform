@@ -10,3 +10,100 @@
 export interface DemoResponse {
   message: string;
 }
+
+/**
+ * Blog-related types
+ */
+export interface Author {
+  id: number;
+  name: string;
+  avatar: string;
+  bio: string;
+  followers?: number;
+  articles?: number;
+}
+
+export interface Comment {
+  id: number;
+  author: Author;
+  content: string;
+  publishedAt: string;
+  likes: number;
+  isLiked: boolean;
+  replies: Comment[];
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  excerpt: string;
+  content: string;
+  author: Author;
+  publishedAt: string;
+  updatedAt?: string;
+  readTime: string;
+  category: string;
+  tags: string[];
+  imageUrl: string;
+  likes: number;
+  isLiked: boolean;
+  isBookmarked: boolean;
+  comments: number;
+  views: number;
+  featured?: boolean;
+  status: "draft" | "published";
+}
+
+export interface CreateBlogRequest {
+  title: string;
+  excerpt: string;
+  content: string;
+  category: string;
+  tags: string[];
+  imageUrl?: string;
+  publishType: "draft" | "publish";
+}
+
+export interface UpdateBlogRequest extends Partial<CreateBlogRequest> {
+  id: number;
+}
+
+export interface CreateCommentRequest {
+  blogId: number;
+  content: string;
+  parentId?: number; // for replies
+}
+
+export interface LikeBlogRequest {
+  blogId: number;
+}
+
+export interface LikeCommentRequest {
+  commentId: number;
+}
+
+/**
+ * API Response types
+ */
+export interface BlogListResponse {
+  blogs: BlogPost[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface BlogDetailResponse {
+  blog: BlogPost;
+  comments: Comment[];
+}
+
+export interface CreateBlogResponse {
+  blog: BlogPost;
+  message: string;
+}
+
+export interface ApiError {
+  error: string;
+  message: string;
+  statusCode: number;
+}
