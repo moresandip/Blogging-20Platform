@@ -1,3 +1,4 @@
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -5,6 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Calendar, Clock, TrendingUp, Users, BookOpen, Star } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
+import { BlogPost, BlogListResponse } from "@shared/api";
 
 const featuredPost = {
   id: 1,
