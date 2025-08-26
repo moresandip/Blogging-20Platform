@@ -97,8 +97,7 @@ export const getAdminStats: RequestHandler = async (req, res) => {
     }
 
     // Import blogs data
-    const blogsModule = await import('./blogs');
-    const mockBlogs = (blogsModule as any).mockBlogs || [];
+    const { mockBlogs } = await import('./blogs');
 
     // Calculate stats
     const totalUsers = mockUsers.length;
