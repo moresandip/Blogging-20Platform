@@ -306,7 +306,7 @@ export const toggleBlogBookmark: RequestHandler = (req, res) => {
 
     blog.isBookmarked = !blog.isBookmarked;
 
-    res.json({ 
+    res.json({
       isBookmarked: blog.isBookmarked,
       message: blog.isBookmarked ? 'Blog bookmarked!' : 'Bookmark removed!'
     });
@@ -315,3 +315,6 @@ export const toggleBlogBookmark: RequestHandler = (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 };
+
+// Export blogs for use in other modules
+export { mockBlogs };
