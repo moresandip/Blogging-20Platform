@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Calendar, Clock, Heart, MessageCircle, Search, Filter, Grid, List } from "lucide-react";
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
-
+import { BlogPost, BlogListResponse } from "@shared/api";
 
 const categories = ["All", "Technology", "React", "Backend", "CSS", "AI", "Development", "Design"];
 
@@ -17,7 +17,7 @@ export default function Blogs() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("latest");
-  const [posts, setPosts] = useState<BlogPost[]>(emptyPosts);
+  const [posts, setPosts] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,17 +25,21 @@ export default function Blogs() {
   const fetchBlogs = async () => {
     try {
       setLoading(true);
-      const params = new URLSearchParams({
-        category: selectedCategory !== "All" ? selectedCategory : "",
-        search: searchTerm,
-        sortBy: sortBy
-      });
-
+      const params = new URLSearchParams();
+      
+      if (selectedCategory !== "All") {
+        params.append("category", selectedCategory);
+      }
+      if (searchTerm) {
+        params.append("search", searchTerm);
+      }
+      params.append("sortBy", sortBy);
+      
       const response = await fetch(`/api/blogs?${params}`);
       if (!response.ok) {
         throw new Error('Failed to fetch blogs');
       }
-
+      
       const data: BlogListResponse = await response.json();
       setPosts(data.blogs);
       setError(null);
@@ -51,8 +55,6 @@ export default function Blogs() {
   useEffect(() => {
     fetchBlogs();
   }, [selectedCategory, searchTerm, sortBy]);
-
-  const sortedPosts = posts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -129,7 +131,7 @@ export default function Blogs() {
           {/* Active Filters */}
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
             <Filter className="w-4 h-4" />
-            <span>Showing {sortedPosts.length} articles</span>
+            <span>Showing {posts.length} articles</span>
             {selectedCategory !== "All" && (
               <Badge variant="secondary" className="ml-2">
                 {selectedCategory}
@@ -144,149 +146,169 @@ export default function Blogs() {
           </div>
         </div>
 
-        {/* Articles Grid/List */}
-        <div className={viewMode === "grid" 
-          ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" 
-          : "space-y-6"
-        }>
-          {sortedPosts.map((post) => (
-            <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
-              {viewMode === "grid" ? (
-                <div>
-                  <img 
-                    src={post.imageUrl} 
-                    alt={post.title}
-                    className="w-full h-48 object-cover"
-                  />
-                  <CardContent className="p-6">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <Badge variant="secondary">{post.category}</Badge>
-                        {post.featured && <Badge className="bg-primary">Featured</Badge>}
-                      </div>
-                      
-                      <h3 className="text-xl font-semibold text-foreground leading-tight hover:text-primary">
-                        <Link to={`/blog/${post.id}`}>{post.title}</Link>
-                      </h3>
-                      
-                      <p className="text-muted-foreground text-sm line-clamp-3">{post.excerpt}</p>
-                      
-                      <div className="flex items-center space-x-3">
-                        <Avatar className="w-8 h-8">
-                          <AvatarImage src={post.author.avatar} />
-                          <AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium text-foreground truncate">{post.author.name}</div>
-                          <div className="text-xs text-muted-foreground">{post.author.bio}</div>
-                        </div>
-                      </div>
-                      
-                      <div className="flex items-center justify-between text-xs text-muted-foreground">
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center">
-                            <Calendar className="w-3 h-3 mr-1" />
-                            {new Date(post.publishedAt).toLocaleDateString()}
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="w-3 h-3 mr-1" />
-                            {post.readTime}
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3">
-                          <div className="flex items-center">
-                            <Heart className="w-3 h-3 mr-1" />
-                            {post.likes}
-                          </div>
-                          <div className="flex items-center">
-                            <MessageCircle className="w-3 h-3 mr-1" />
-                            {post.comments}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </div>
-              ) : (
-                <div className="md:flex">
-                  <div className="md:w-1/3">
-                    <img 
-                      src={post.imageUrl} 
-                      alt={post.title}
-                      className="w-full h-48 md:h-full object-cover"
-                    />
-                  </div>
-                  <CardContent className="md:w-2/3 p-6">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
-                        <Badge variant="secondary">{post.category}</Badge>
-                        {post.featured && <Badge className="bg-primary">Featured</Badge>}
-                      </div>
-                      
-                      <h3 className="text-2xl font-semibold text-foreground leading-tight hover:text-primary">
-                        <Link to={`/blog/${post.id}`}>{post.title}</Link>
-                      </h3>
-                      
-                      <p className="text-muted-foreground">{post.excerpt}</p>
-                      
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-3">
-                          <Avatar className="w-10 h-10">
-                            <AvatarImage src={post.author.avatar} />
-                            <AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                          </Avatar>
-                          <div>
-                            <div className="font-medium text-foreground">{post.author.name}</div>
-                            <div className="text-sm text-muted-foreground">{post.author.bio}</div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                          <div className="flex items-center">
-                            <Calendar className="w-4 h-4 mr-1" />
-                            {new Date(post.publishedAt).toLocaleDateString()}
-                          </div>
-                          <div className="flex items-center">
-                            <Clock className="w-4 h-4 mr-1" />
-                            {post.readTime}
-                          </div>
-                          <div className="flex items-center">
-                            <Heart className="w-4 h-4 mr-1" />
-                            {post.likes}
-                          </div>
-                          <div className="flex items-center">
-                            <MessageCircle className="w-4 h-4 mr-1" />
-                            {post.comments}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </div>
-              )}
-            </Card>
-          ))}
-        </div>
-
-        {sortedPosts.length === 0 && (
+        {/* Loading State */}
+        {loading && (
           <div className="text-center py-12">
-            <div className="text-muted-foreground mb-4">No articles found matching your criteria</div>
-            <Button onClick={() => {
-              setSearchTerm("");
-              setSelectedCategory("All");
-            }}>
-              Clear Filters
-            </Button>
+            <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading articles...</p>
           </div>
         )}
 
-        {/* Load More */}
-        {!loading && !error && sortedPosts.length > 0 && (
-          <div className="text-center mt-12">
-            <Button variant="outline" size="lg">
-              Load More Articles
-            </Button>
+        {/* Error State */}
+        {error && (
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">Error: {error}</p>
+            <Button onClick={fetchBlogs}>Try Again</Button>
           </div>
+        )}
+
+        {/* Articles Grid/List */}
+        {!loading && !error && (
+          <>
+            <div className={viewMode === "grid" 
+              ? "grid md:grid-cols-2 lg:grid-cols-3 gap-6" 
+              : "space-y-6"
+            }>
+              {posts.map((post) => (
+                <Card key={post.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+                  {viewMode === "grid" ? (
+                    <div>
+                      <img 
+                        src={post.imageUrl} 
+                        alt={post.title}
+                        className="w-full h-48 object-cover"
+                      />
+                      <CardContent className="p-6">
+                        <div className="space-y-3">
+                          <div className="flex items-center justify-between">
+                            <Badge variant="secondary">{post.category}</Badge>
+                            {post.featured && <Badge className="bg-primary">Featured</Badge>}
+                          </div>
+                          
+                          <h3 className="text-xl font-semibold text-foreground leading-tight hover:text-primary">
+                            <Link to={`/blog/${post.id}`}>{post.title}</Link>
+                          </h3>
+                          
+                          <p className="text-muted-foreground text-sm line-clamp-3">{post.excerpt}</p>
+                          
+                          <div className="flex items-center space-x-3">
+                            <Avatar className="w-8 h-8">
+                              <AvatarImage src={post.author.avatar} />
+                              <AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium text-foreground truncate">{post.author.name}</div>
+                              <div className="text-xs text-muted-foreground">{post.author.bio}</div>
+                            </div>
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center">
+                                <Calendar className="w-3 h-3 mr-1" />
+                                {new Date(post.publishedAt).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-3 h-3 mr-1" />
+                                {post.readTime}
+                              </div>
+                            </div>
+                            <div className="flex items-center space-x-3">
+                              <div className="flex items-center">
+                                <Heart className="w-3 h-3 mr-1" />
+                                {post.likes}
+                              </div>
+                              <div className="flex items-center">
+                                <MessageCircle className="w-3 h-3 mr-1" />
+                                {post.comments}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </div>
+                  ) : (
+                    <div className="md:flex">
+                      <div className="md:w-1/3">
+                        <img 
+                          src={post.imageUrl} 
+                          alt={post.title}
+                          className="w-full h-48 md:h-full object-cover"
+                        />
+                      </div>
+                      <CardContent className="md:w-2/3 p-6">
+                        <div className="space-y-3">
+                          <div className="flex items-center gap-2">
+                            <Badge variant="secondary">{post.category}</Badge>
+                            {post.featured && <Badge className="bg-primary">Featured</Badge>}
+                          </div>
+                          
+                          <h3 className="text-2xl font-semibold text-foreground leading-tight hover:text-primary">
+                            <Link to={`/blog/${post.id}`}>{post.title}</Link>
+                          </h3>
+                          
+                          <p className="text-muted-foreground">{post.excerpt}</p>
+                          
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-3">
+                              <Avatar className="w-10 h-10">
+                                <AvatarImage src={post.author.avatar} />
+                                <AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              </Avatar>
+                              <div>
+                                <div className="font-medium text-foreground">{post.author.name}</div>
+                                <div className="text-sm text-muted-foreground">{post.author.bio}</div>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 mr-1" />
+                                {new Date(post.publishedAt).toLocaleDateString()}
+                              </div>
+                              <div className="flex items-center">
+                                <Clock className="w-4 h-4 mr-1" />
+                                {post.readTime}
+                              </div>
+                              <div className="flex items-center">
+                                <Heart className="w-4 h-4 mr-1" />
+                                {post.likes}
+                              </div>
+                              <div className="flex items-center">
+                                <MessageCircle className="w-4 h-4 mr-1" />
+                                {post.comments}
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </div>
+                  )}
+                </Card>
+              ))}
+            </div>
+
+            {posts.length === 0 && (
+              <div className="text-center py-12">
+                <div className="text-muted-foreground mb-4">No articles found matching your criteria</div>
+                <Button onClick={() => {
+                  setSearchTerm("");
+                  setSelectedCategory("All");
+                }}>
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+
+            {/* Load More */}
+            {posts.length > 0 && (
+              <div className="text-center mt-12">
+                <Button variant="outline" size="lg">
+                  Load More Articles
+                </Button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

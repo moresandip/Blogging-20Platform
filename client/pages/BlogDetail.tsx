@@ -18,6 +18,7 @@ import {
   MoreHorizontal 
 } from "lucide-react";
 import Header from "@/components/Header";
+import { BlogPost, Comment, BlogDetailResponse } from "@shared/api";
 
 // Mock data - replace with actual API calls
 const mockBlogPost = {
@@ -128,38 +129,113 @@ const mockComments = [
 
 export default function BlogDetail() {
   const { id } = useParams();
-  const [post, setPost] = useState(mockBlogPost);
-  const [comments, setComments] = useState(mockComments);
+  const [post, setPost] = useState<BlogPost | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState("");
-  const [isLiked, setIsLiked] = useState(false);
-  const [isBookmarked, setIsBookmarked] = useState(false);
-  const [likeCount, setLikeCount] = useState(234);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleLike = () => {
-    setIsLiked(!isLiked);
-    setLikeCount(prev => isLiked ? prev - 1 : prev + 1);
+  // Fetch blog post and comments
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+
+        // Fetch blog post
+        const blogResponse = await fetch(`/api/blogs/${id}`);
+        if (!blogResponse.ok) {
+          throw new Error('Blog post not found');
+        }
+        const blogData: BlogDetailResponse = await blogResponse.json();
+        setPost(blogData.blog);
+
+        // Fetch comments
+        const commentsResponse = await fetch(`/api/blogs/${id}/comments`);
+        if (commentsResponse.ok) {
+          const commentsData = await commentsResponse.json();
+          setComments(commentsData.comments || []);
+        }
+
+        setError(null);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error('Error fetching blog data:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBlogData();
+  }, [id]);
+
+  const handleLike = async () => {
+    if (!post) return;
+
+    try {
+      const response = await fetch(`/api/blogs/${post.id}/like`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPost(prev => prev ? {
+          ...prev,
+          isLiked: data.isLiked,
+          likes: data.likes
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+    }
   };
 
-  const handleBookmark = () => {
-    setIsBookmarked(!isBookmarked);
+  const handleBookmark = async () => {
+    if (!post) return;
+
+    try {
+      const response = await fetch(`/api/blogs/${post.id}/bookmark`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' }
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setPost(prev => prev ? {
+          ...prev,
+          isBookmarked: data.isBookmarked
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+    }
   };
 
-  const handleComment = () => {
-    if (newComment.trim()) {
-      const comment = {
-        id: comments.length + 1,
-        author: {
-          name: "Current User",
-          avatar: "/placeholder.svg"
-        },
-        content: newComment,
-        publishedAt: new Date().toISOString(),
-        likes: 0,
-        isLiked: false,
-        replies: []
-      };
-      setComments([...comments, comment]);
-      setNewComment("");
+  const handleComment = async () => {
+    if (!newComment.trim() || !post) return;
+
+    try {
+      const response = await fetch(`/api/blogs/${post.id}/comments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: newComment })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setComments(prev => [...prev, data.comment]);
+        setNewComment("");
+
+        // Update comment count on post
+        setPost(prev => prev ? {
+          ...prev,
+          comments: prev.comments + 1
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error adding comment:', error);
     }
   };
 
@@ -182,10 +258,40 @@ export default function BlogDetail() {
     return formatDate(dateString);
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto max-w-4xl px-4 py-8">
+          <div className="text-center py-12">
+            <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full mx-auto"></div>
+            <p className="mt-4 text-muted-foreground">Loading article...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !post) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container mx-auto max-w-4xl px-4 py-8">
+          <div className="text-center py-12">
+            <p className="text-red-500 mb-4">{error || 'Article not found'}</p>
+            <Link to="/blogs">
+              <Button>Back to Articles</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Back Button */}
         <Link to="/blogs" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
@@ -245,14 +351,14 @@ export default function BlogDetail() {
           {/* Article Actions */}
           <div className="flex items-center justify-between py-4 border-y">
             <div className="flex items-center space-x-4">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 onClick={handleLike}
-                className={isLiked ? "text-red-500" : ""}
+                className={post.isLiked ? "text-red-500" : ""}
               >
-                <Heart className={`w-4 h-4 mr-2 ${isLiked ? "fill-current" : ""}`} />
-                {likeCount}
+                <Heart className={`w-4 h-4 mr-2 ${post.isLiked ? "fill-current" : ""}`} />
+                {post.likes}
               </Button>
               <Button variant="ghost" size="sm">
                 <MessageCircle className="w-4 h-4 mr-2" />
@@ -260,13 +366,13 @@ export default function BlogDetail() {
               </Button>
             </div>
             <div className="flex items-center space-x-2">
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="sm"
                 onClick={handleBookmark}
-                className={isBookmarked ? "text-primary" : ""}
+                className={post.isBookmarked ? "text-primary" : ""}
               >
-                <Bookmark className={`w-4 h-4 ${isBookmarked ? "fill-current" : ""}`} />
+                <Bookmark className={`w-4 h-4 ${post.isBookmarked ? "fill-current" : ""}`} />
               </Button>
               <Button variant="ghost" size="sm">
                 <Share2 className="w-4 h-4" />
