@@ -60,6 +60,29 @@ const categories = [
 ];
 
 export default function Index() {
+  const [featuredPost, setFeaturedPost] = useState<BlogPost | null>(null);
+  const [trendingPosts, setTrendingPosts] = useState<BlogPost[]>([]);
+
+  useEffect(() => {
+    // Fetch featured and trending posts
+    const fetchFeaturedContent = async () => {
+      try {
+        const response = await fetch('/api/blogs?sortBy=popular&pageSize=4');
+        if (response.ok) {
+          const data: BlogListResponse = await response.json();
+          if (data.blogs.length > 0) {
+            setFeaturedPost(data.blogs[0]);
+            setTrendingPosts(data.blogs.slice(1));
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching featured content:', error);
+      }
+    };
+
+    fetchFeaturedContent();
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
       <Header />
@@ -136,52 +159,59 @@ export default function Index() {
             <p className="text-muted-foreground">Hand-picked by our editorial team</p>
           </div>
           
-          <Card className="overflow-hidden hover:shadow-lg transition-shadow">
-            <div className="md:flex">
-              <div className="md:w-1/2">
-                <img 
-                  src={featuredPost.imageUrl} 
-                  alt={featuredPost.title}
-                  className="w-full h-64 md:h-full object-cover"
-                />
-              </div>
-              <CardContent className="md:w-1/2 p-8">
-                <div className="space-y-4">
-                  <Badge variant="secondary">{featuredPost.category}</Badge>
-                  <h3 className="text-2xl font-bold text-foreground leading-tight">
-                    {featuredPost.title}
-                  </h3>
-                  <p className="text-muted-foreground">{featuredPost.excerpt}</p>
-                  
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="w-10 h-10">
-                      <AvatarImage src={featuredPost.author.avatar} />
-                      <AvatarFallback>{featuredPost.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                      <div className="font-medium text-foreground">{featuredPost.author.name}</div>
-                      <div className="text-sm text-muted-foreground">{featuredPost.author.bio}</div>
-                    </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-4 text-sm text-muted-foreground">
-                    <div className="flex items-center">
-                      <Calendar className="w-4 h-4 mr-1" />
-                      {new Date(featuredPost.publishedAt).toLocaleDateString()}
-                    </div>
-                    <div className="flex items-center">
-                      <Clock className="w-4 h-4 mr-1" />
-                      {featuredPost.readTime}
-                    </div>
-                  </div>
-                  
-                  <Link to={`/blog/${featuredPost.id}`}>
-                    <Button className="w-full md:w-auto">Read Full Story</Button>
-                  </Link>
+          {featuredPost ? (
+            <Card className="overflow-hidden hover:shadow-lg transition-shadow">
+              <div className="md:flex">
+                <div className="md:w-1/2">
+                  <img
+                    src={featuredPost.imageUrl}
+                    alt={featuredPost.title}
+                    className="w-full h-64 md:h-full object-cover"
+                  />
                 </div>
-              </CardContent>
+                <CardContent className="md:w-1/2 p-8">
+                  <div className="space-y-4">
+                    <Badge variant="secondary">{featuredPost.category}</Badge>
+                    <h3 className="text-2xl font-bold text-foreground leading-tight">
+                      {featuredPost.title}
+                    </h3>
+                    <p className="text-muted-foreground">{featuredPost.excerpt}</p>
+
+                    <div className="flex items-center space-x-4">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage src={featuredPost.author.avatar} />
+                        <AvatarFallback>{featuredPost.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium text-foreground">{featuredPost.author.name}</div>
+                        <div className="text-sm text-muted-foreground">{featuredPost.author.bio}</div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4 text-sm text-muted-foreground">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 mr-1" />
+                        {new Date(featuredPost.publishedAt).toLocaleDateString()}
+                      </div>
+                      <div className="flex items-center">
+                        <Clock className="w-4 h-4 mr-1" />
+                        {featuredPost.readTime}
+                      </div>
+                    </div>
+
+                    <Link to={`/blog/${featuredPost.id}`}>
+                      <Button className="w-full md:w-auto">Read Full Story</Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </div>
+            </Card>
+          ) : (
+            <div className="text-center py-12">
+              <div className="animate-spin h-8 w-8 border-b-2 border-primary rounded-full mx-auto"></div>
+              <p className="mt-4 text-muted-foreground">Loading featured story...</p>
             </div>
-          </Card>
+          )}
         </div>
       </section>
 
@@ -194,27 +224,48 @@ export default function Index() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-6">
-            {trendingPosts.map((post, index) => (
-              <Card key={post.id} className="hover:shadow-md transition-shadow">
-                <CardContent className="p-6">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between">
-                      <Badge variant="outline">{post.category}</Badge>
-                      <span className="text-2xl font-bold text-primary">#{index + 1}</span>
+            {trendingPosts.length > 0 ? trendingPosts.map((post, index) => (
+              <Link key={post.id} to={`/blog/${post.id}`}>
+                <Card className="hover:shadow-md transition-shadow h-full">
+                  <CardContent className="p-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <Badge variant="outline">{post.category}</Badge>
+                        <span className="text-2xl font-bold text-primary">#{index + 1}</span>
+                      </div>
+                      <h3 className="font-semibold text-foreground leading-tight">{post.title}</h3>
+                      <div className="flex items-center justify-between text-sm text-muted-foreground">
+                        <span>by {post.author.name}</span>
+                        <span>{post.readTime}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Star className="w-4 h-4 mr-1 fill-current" />
+                        {post.likes} likes
+                      </div>
                     </div>
-                    <h3 className="font-semibold text-foreground leading-tight">{post.title}</h3>
-                    <div className="flex items-center justify-between text-sm text-muted-foreground">
-                      <span>by {post.author}</span>
-                      <span>{post.readTime}</span>
+                  </CardContent>
+                </Card>
+              </Link>
+            )) : (
+              Array.from({ length: 3 }).map((_, index) => (
+                <Card key={index} className="hover:shadow-md transition-shadow">
+                  <CardContent className="p-6">
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="h-6 bg-muted rounded animate-pulse w-20"></div>
+                        <div className="h-8 bg-muted rounded animate-pulse w-8"></div>
+                      </div>
+                      <div className="h-12 bg-muted rounded animate-pulse"></div>
+                      <div className="flex items-center justify-between">
+                        <div className="h-4 bg-muted rounded animate-pulse w-24"></div>
+                        <div className="h-4 bg-muted rounded animate-pulse w-16"></div>
+                      </div>
+                      <div className="h-4 bg-muted rounded animate-pulse w-20"></div>
                     </div>
-                    <div className="flex items-center text-sm text-muted-foreground">
-                      <Star className="w-4 h-4 mr-1 fill-current" />
-                      {post.likes} likes
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))
+            )}
           </div>
           
           <div className="text-center mt-8">
