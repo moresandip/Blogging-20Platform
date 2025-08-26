@@ -12,6 +12,7 @@ import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import { CreateBlogRequest, CreateBlogResponse } from "@shared/api";
 
 const categories = [
   "Technology", "React", "Backend", "CSS", "AI", "Development", 
@@ -110,29 +111,41 @@ export default function CreateBlog() {
 
   const handleSave = async (publishType: "draft" | "publish") => {
     setIsLoading(true);
-    
+
     try {
-      const postData = {
-        ...formData,
-        publishType,
-        readTime: calculateReadTime(formData.content),
-        publishedAt: publishType === "publish" ? new Date().toISOString() : null
+      const postData: CreateBlogRequest = {
+        title: formData.title,
+        excerpt: formData.excerpt,
+        content: formData.content,
+        category: formData.category,
+        tags: formData.tags,
+        imageUrl: formData.imageUrl,
+        publishType
       };
 
-      // TODO: Replace with actual API call
-      console.log("Saving post:", postData);
-      
-      // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      const response = await fetch("/api/blogs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(postData)
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to save blog post");
+      }
+
+      const data: CreateBlogResponse = await response.json();
+
       if (publishType === "publish") {
         navigate("/blogs");
       } else {
         // Show success message for draft
-        alert("Draft saved successfully!");
+        alert(data.message || "Draft saved successfully!");
       }
     } catch (error) {
       console.error("Error saving post:", error);
+      alert("Failed to save blog post. Please try again.");
     } finally {
       setIsLoading(false);
     }
