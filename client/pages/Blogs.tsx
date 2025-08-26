@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,105 +9,6 @@ import { Calendar, Clock, Heart, MessageCircle, Search, Filter, Grid, List } fro
 import { Link } from "react-router-dom";
 import Header from "@/components/Header";
 
-const mockPosts = [
-  {
-    id: 1,
-    title: "The Future of Web Development: What to Expect in 2024",
-    excerpt: "Explore the latest trends, technologies, and frameworks that are shaping the future of web development. From AI integration to serverless architecture, discover what's coming next.",
-    author: {
-      name: "Sarah Chen",
-      avatar: "/placeholder.svg",
-      bio: "Senior Full Stack Developer"
-    },
-    publishedAt: "2024-01-15",
-    readTime: "8 min read",
-    category: "Technology",
-    imageUrl: "/placeholder.svg",
-    likes: 234,
-    comments: 45,
-    featured: true
-  },
-  {
-    id: 2,
-    title: "Mastering React Server Components",
-    excerpt: "A comprehensive guide to understanding and implementing React Server Components in your applications. Learn the benefits, challenges, and best practices.",
-    author: {
-      name: "Alex Rodriguez",
-      avatar: "/placeholder.svg",
-      bio: "React Developer"
-    },
-    publishedAt: "2024-01-14",
-    readTime: "6 min read",
-    category: "React",
-    imageUrl: "/placeholder.svg",
-    likes: 189,
-    comments: 32
-  },
-  {
-    id: 3,
-    title: "Building Scalable APIs with Node.js",
-    excerpt: "Learn how to design and build APIs that can handle millions of requests. Best practices for performance, security, and maintainability.",
-    author: {
-      name: "Emma Thompson",
-      avatar: "/placeholder.svg",
-      bio: "Backend Engineer"
-    },
-    publishedAt: "2024-01-13",
-    readTime: "10 min read",
-    category: "Backend",
-    imageUrl: "/placeholder.svg",
-    likes: 156,
-    comments: 28
-  },
-  {
-    id: 4,
-    title: "CSS Grid vs Flexbox: When to Use What",
-    excerpt: "Understanding the differences between CSS Grid and Flexbox, and knowing when to use each layout method for optimal results.",
-    author: {
-      name: "Michael Park",
-      avatar: "/placeholder.svg",
-      bio: "Frontend Designer"
-    },
-    publishedAt: "2024-01-12",
-    readTime: "5 min read",
-    category: "CSS",
-    imageUrl: "/placeholder.svg",
-    likes: 203,
-    comments: 19
-  },
-  {
-    id: 5,
-    title: "Introduction to Machine Learning for Developers",
-    excerpt: "Get started with machine learning concepts and practical implementations. Perfect for developers looking to add ML to their skillset.",
-    author: {
-      name: "David Kim",
-      avatar: "/placeholder.svg",
-      bio: "ML Engineer"
-    },
-    publishedAt: "2024-01-11",
-    readTime: "12 min read",
-    category: "AI",
-    imageUrl: "/placeholder.svg",
-    likes: 278,
-    comments: 56
-  },
-  {
-    id: 6,
-    title: "The Art of Code Reviews",
-    excerpt: "How to conduct effective code reviews that improve code quality and team collaboration. Tips for both reviewers and reviewees.",
-    author: {
-      name: "Lisa Wang",
-      avatar: "/placeholder.svg",
-      bio: "Senior Developer"
-    },
-    publishedAt: "2024-01-10",
-    readTime: "7 min read",
-    category: "Development",
-    imageUrl: "/placeholder.svg",
-    likes: 145,
-    comments: 23
-  }
-];
 
 const categories = ["All", "Technology", "React", "Backend", "CSS", "AI", "Development", "Design"];
 
@@ -116,26 +17,42 @@ export default function Blogs() {
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [sortBy, setSortBy] = useState("latest");
+  const [posts, setPosts] = useState<BlogPost[]>(emptyPosts);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const filteredPosts = mockPosts.filter(post => {
-    const matchesSearch = post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.excerpt.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         post.author.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || post.category === selectedCategory;
-    return matchesSearch && matchesCategory;
-  });
+  // Fetch blogs from API
+  const fetchBlogs = async () => {
+    try {
+      setLoading(true);
+      const params = new URLSearchParams({
+        category: selectedCategory !== "All" ? selectedCategory : "",
+        search: searchTerm,
+        sortBy: sortBy
+      });
 
-  const sortedPosts = [...filteredPosts].sort((a, b) => {
-    switch (sortBy) {
-      case "popular":
-        return b.likes - a.likes;
-      case "comments":
-        return b.comments - a.comments;
-      case "latest":
-      default:
-        return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+      const response = await fetch(`/api/blogs?${params}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch blogs');
+      }
+
+      const data: BlogListResponse = await response.json();
+      setPosts(data.blogs);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('Error fetching blogs:', err);
+    } finally {
+      setLoading(false);
     }
-  });
+  };
+
+  // Fetch blogs on component mount and when filters change
+  useEffect(() => {
+    fetchBlogs();
+  }, [selectedCategory, searchTerm, sortBy]);
+
+  const sortedPosts = posts;
 
   return (
     <div className="min-h-screen bg-background">
@@ -364,7 +281,7 @@ export default function Blogs() {
         )}
 
         {/* Load More */}
-        {sortedPosts.length > 0 && (
+        {!loading && !error && sortedPosts.length > 0 && (
           <div className="text-center mt-12">
             <Button variant="outline" size="lg">
               Load More Articles
