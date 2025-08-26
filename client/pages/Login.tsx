@@ -14,10 +14,10 @@ export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  
+
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -27,7 +27,7 @@ export default function Login() {
   const from = location.state?.from?.pathname || "/";
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (error) setError(null); // Clear error when user starts typing
   };
 
@@ -40,7 +40,7 @@ export default function Login() {
       await login(formData);
       navigate(from, { replace: true });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+      setError(err instanceof Error ? err.message : "Login failed");
     } finally {
       setIsLoading(false);
     }
@@ -51,7 +51,7 @@ export default function Login() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto max-w-md px-4 py-16">
         <Card>
           <CardHeader className="text-center">
@@ -60,7 +60,7 @@ export default function Login() {
               Sign in to your BlogSpace account
             </p>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             {error && (
               <Alert variant="destructive">
@@ -94,7 +94,9 @@ export default function Login() {
                     type={showPassword ? "text" : "password"}
                     placeholder="Enter your password"
                     value={formData.password}
-                    onChange={(e) => handleInputChange("password", e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("password", e.target.value)
+                    }
                     className="pl-10 pr-10"
                     required
                   />
@@ -103,14 +105,18 @@ export default function Login() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
                   </button>
                 </div>
               </div>
 
-              <Button 
-                type="submit" 
-                className="w-full" 
+              <Button
+                type="submit"
+                className="w-full"
                 disabled={!isFormValid || isLoading}
               >
                 <LogIn className="w-4 h-4 mr-2" />
@@ -119,8 +125,8 @@ export default function Login() {
             </form>
 
             <div className="text-center">
-              <Link 
-                to="/forgot-password" 
+              <Link
+                to="/forgot-password"
                 className="text-sm text-primary hover:underline"
               >
                 Forgot your password?
@@ -142,10 +148,16 @@ export default function Login() {
 
             {/* Demo Credentials */}
             <div className="bg-muted/50 rounded-lg p-4 text-center">
-              <p className="text-sm font-medium text-foreground mb-2">Demo Credentials</p>
+              <p className="text-sm font-medium text-foreground mb-2">
+                Demo Credentials
+              </p>
               <div className="text-xs text-muted-foreground space-y-1">
-                <p><strong>Admin:</strong> admin@blogspace.com / admin123</p>
-                <p><strong>User:</strong> sarah@example.com / password123</p>
+                <p>
+                  <strong>Admin:</strong> admin@blogspace.com / admin123
+                </p>
+                <p>
+                  <strong>User:</strong> sarah@example.com / password123
+                </p>
               </div>
             </div>
           </CardContent>

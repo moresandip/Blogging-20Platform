@@ -6,16 +6,16 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { 
-  Heart, 
-  MessageCircle, 
-  Share2, 
-  Bookmark, 
-  Calendar, 
-  Clock, 
+import {
+  Heart,
+  MessageCircle,
+  Share2,
+  Bookmark,
+  Calendar,
+  Clock,
   ArrowLeft,
   Send,
-  MoreHorizontal 
+  MoreHorizontal,
 } from "lucide-react";
 import Header from "@/components/Header";
 import { BlogPost, Comment, BlogDetailResponse } from "@shared/api";
@@ -61,7 +61,7 @@ const mockBlogPost = {
     avatar: "/placeholder.svg",
     bio: "Senior Full Stack Developer at TechCorp",
     followers: 1250,
-    articles: 45
+    articles: 45,
   },
   publishedAt: "2024-01-15T10:30:00Z",
   updatedAt: "2024-01-15T14:20:00Z",
@@ -73,7 +73,7 @@ const mockBlogPost = {
   isLiked: false,
   isBookmarked: false,
   comments: 45,
-  views: 3200
+  views: 3200,
 };
 
 const mockComments = [
@@ -81,9 +81,10 @@ const mockComments = [
     id: 1,
     author: {
       name: "Alex Rodriguez",
-      avatar: "/placeholder.svg"
+      avatar: "/placeholder.svg",
     },
-    content: "Great article! I'm particularly excited about Server Components. The performance implications are huge.",
+    content:
+      "Great article! I'm particularly excited about Server Components. The performance implications are huge.",
     publishedAt: "2024-01-15T16:45:00Z",
     likes: 12,
     isLiked: false,
@@ -92,39 +93,42 @@ const mockComments = [
         id: 11,
         author: {
           name: "Sarah Chen",
-          avatar: "/placeholder.svg"
+          avatar: "/placeholder.svg",
         },
-        content: "Thanks Alex! Yes, Server Components are game-changing. I've seen 40-50% bundle size reductions in some cases.",
+        content:
+          "Thanks Alex! Yes, Server Components are game-changing. I've seen 40-50% bundle size reductions in some cases.",
         publishedAt: "2024-01-15T17:15:00Z",
         likes: 8,
-        isLiked: false
-      }
-    ]
+        isLiked: false,
+      },
+    ],
   },
   {
     id: 2,
     author: {
       name: "Emma Thompson",
-      avatar: "/placeholder.svg"
+      avatar: "/placeholder.svg",
     },
-    content: "The AI integration section resonates with me. I've been using Copilot for 6 months now and my productivity has increased significantly.",
+    content:
+      "The AI integration section resonates with me. I've been using Copilot for 6 months now and my productivity has increased significantly.",
     publishedAt: "2024-01-15T18:20:00Z",
     likes: 15,
     isLiked: false,
-    replies: []
+    replies: [],
   },
   {
     id: 3,
     author: {
       name: "Michael Park",
-      avatar: "/placeholder.svg"
+      avatar: "/placeholder.svg",
     },
-    content: "Edge computing is definitely the future. The latency improvements are noticeable, especially for global applications.",
+    content:
+      "Edge computing is definitely the future. The latency improvements are noticeable, especially for global applications.",
     publishedAt: "2024-01-16T09:10:00Z",
     likes: 7,
     isLiked: false,
-    replies: []
-  }
+    replies: [],
+  },
 ];
 
 export default function BlogDetail() {
@@ -146,7 +150,7 @@ export default function BlogDetail() {
         // Fetch blog post
         const blogResponse = await fetch(`/api/blogs/${id}`);
         if (!blogResponse.ok) {
-          throw new Error('Blog post not found');
+          throw new Error("Blog post not found");
         }
         const blogData: BlogDetailResponse = await blogResponse.json();
         setPost(blogData.blog);
@@ -160,8 +164,8 @@ export default function BlogDetail() {
 
         setError(null);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'An error occurred');
-        console.error('Error fetching blog data:', err);
+        setError(err instanceof Error ? err.message : "An error occurred");
+        console.error("Error fetching blog data:", err);
       } finally {
         setLoading(false);
       }
@@ -175,20 +179,24 @@ export default function BlogDetail() {
 
     try {
       const response = await fetch(`/api/blogs/${post.id}/like`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.ok) {
         const data = await response.json();
-        setPost(prev => prev ? {
-          ...prev,
-          isLiked: data.isLiked,
-          likes: data.likes
-        } : null);
+        setPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                isLiked: data.isLiked,
+                likes: data.likes,
+              }
+            : null,
+        );
       }
     } catch (error) {
-      console.error('Error toggling like:', error);
+      console.error("Error toggling like:", error);
     }
   };
 
@@ -197,19 +205,23 @@ export default function BlogDetail() {
 
     try {
       const response = await fetch(`/api/blogs/${post.id}/bookmark`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' }
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
       });
 
       if (response.ok) {
         const data = await response.json();
-        setPost(prev => prev ? {
-          ...prev,
-          isBookmarked: data.isBookmarked
-        } : null);
+        setPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                isBookmarked: data.isBookmarked,
+              }
+            : null,
+        );
       }
     } catch (error) {
-      console.error('Error toggling bookmark:', error);
+      console.error("Error toggling bookmark:", error);
     }
   };
 
@@ -218,41 +230,47 @@ export default function BlogDetail() {
 
     try {
       const response = await fetch(`/api/blogs/${post.id}/comments`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newComment })
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: newComment }),
       });
 
       if (response.ok) {
         const data = await response.json();
-        setComments(prev => [...prev, data.comment]);
+        setComments((prev) => [...prev, data.comment]);
         setNewComment("");
 
         // Update comment count on post
-        setPost(prev => prev ? {
-          ...prev,
-          comments: prev.comments + 1
-        } : null);
+        setPost((prev) =>
+          prev
+            ? {
+                ...prev,
+                comments: prev.comments + 1,
+              }
+            : null,
+        );
       }
     } catch (error) {
-      console.error('Error adding comment:', error);
+      console.error("Error adding comment:", error);
     }
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
     });
   };
 
   const formatTimeAgo = (dateString: string) => {
     const now = new Date();
     const date = new Date(dateString);
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
-    if (diffInHours < 1) return 'Just now';
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    );
+
+    if (diffInHours < 1) return "Just now";
     if (diffInHours < 24) return `${diffInHours}h ago`;
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)}d ago`;
     return formatDate(dateString);
@@ -278,7 +296,7 @@ export default function BlogDetail() {
         <Header />
         <div className="container mx-auto max-w-4xl px-4 py-8">
           <div className="text-center py-12">
-            <p className="text-red-500 mb-4">{error || 'Article not found'}</p>
+            <p className="text-red-500 mb-4">{error || "Article not found"}</p>
             <Link to="/blogs">
               <Button>Back to Articles</Button>
             </Link>
@@ -294,7 +312,10 @@ export default function BlogDetail() {
 
       <div className="container mx-auto max-w-4xl px-4 py-8">
         {/* Back Button */}
-        <Link to="/blogs" className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6">
+        <Link
+          to="/blogs"
+          className="inline-flex items-center text-muted-foreground hover:text-foreground mb-6"
+        >
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Articles
         </Link>
@@ -303,7 +324,9 @@ export default function BlogDetail() {
         <article className="space-y-8">
           <header className="space-y-6">
             <div className="space-y-4">
-              <Badge variant="secondary" className="text-sm">{post.category}</Badge>
+              <Badge variant="secondary" className="text-sm">
+                {post.category}
+              </Badge>
               <h1 className="text-4xl md:text-5xl font-bold text-foreground leading-tight">
                 {post.title}
               </h1>
@@ -314,13 +337,23 @@ export default function BlogDetail() {
               <div className="flex items-center space-x-4">
                 <Avatar className="w-12 h-12">
                   <AvatarImage src={post.author.avatar} />
-                  <AvatarFallback>{post.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  <AvatarFallback>
+                    {post.author.name
+                      .split(" ")
+                      .map((n) => n[0])
+                      .join("")}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
-                  <div className="font-semibold text-foreground">{post.author.name}</div>
-                  <div className="text-sm text-muted-foreground">{post.author.bio}</div>
+                  <div className="font-semibold text-foreground">
+                    {post.author.name}
+                  </div>
+                  <div className="text-sm text-muted-foreground">
+                    {post.author.bio}
+                  </div>
                   <div className="text-xs text-muted-foreground">
-                    {post.author.followers} followers · {post.author.articles} articles
+                    {post.author.followers} followers · {post.author.articles}{" "}
+                    articles
                   </div>
                 </div>
               </div>
@@ -341,8 +374,8 @@ export default function BlogDetail() {
             </div>
 
             {/* Featured Image */}
-            <img 
-              src={post.imageUrl} 
+            <img
+              src={post.imageUrl}
               alt={post.title}
               className="w-full h-64 md:h-96 object-cover rounded-lg"
             />
@@ -357,7 +390,9 @@ export default function BlogDetail() {
                 onClick={handleLike}
                 className={post.isLiked ? "text-red-500" : ""}
               >
-                <Heart className={`w-4 h-4 mr-2 ${post.isLiked ? "fill-current" : ""}`} />
+                <Heart
+                  className={`w-4 h-4 mr-2 ${post.isLiked ? "fill-current" : ""}`}
+                />
                 {post.likes}
               </Button>
               <Button variant="ghost" size="sm">
@@ -372,7 +407,9 @@ export default function BlogDetail() {
                 onClick={handleBookmark}
                 className={post.isBookmarked ? "text-primary" : ""}
               >
-                <Bookmark className={`w-4 h-4 ${post.isBookmarked ? "fill-current" : ""}`} />
+                <Bookmark
+                  className={`w-4 h-4 ${post.isBookmarked ? "fill-current" : ""}`}
+                />
               </Button>
               <Button variant="ghost" size="sm">
                 <Share2 className="w-4 h-4" />
@@ -384,15 +421,17 @@ export default function BlogDetail() {
           </div>
 
           {/* Article Content */}
-          <div 
+          <div
             className="prose prose-lg max-w-none text-foreground"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
 
           {/* Tags */}
           <div className="flex flex-wrap gap-2 pt-8">
-            {post.tags.map(tag => (
-              <Badge key={tag} variant="outline">#{tag}</Badge>
+            {post.tags.map((tag) => (
+              <Badge key={tag} variant="outline">
+                #{tag}
+              </Badge>
             ))}
           </div>
         </article>
@@ -429,7 +468,7 @@ export default function BlogDetail() {
 
           {/* Comments List */}
           <div className="space-y-6">
-            {comments.map(comment => (
+            {comments.map((comment) => (
               <Card key={comment.id}>
                 <CardContent className="p-6">
                   <div className="space-y-4">
@@ -437,19 +476,26 @@ export default function BlogDetail() {
                       <div className="flex items-center space-x-3">
                         <Avatar className="w-10 h-10">
                           <AvatarImage src={comment.author.avatar} />
-                          <AvatarFallback>{comment.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          <AvatarFallback>
+                            {comment.author.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
                         </Avatar>
                         <div>
-                          <div className="font-semibold text-foreground">{comment.author.name}</div>
+                          <div className="font-semibold text-foreground">
+                            {comment.author.name}
+                          </div>
                           <div className="text-sm text-muted-foreground">
                             {formatTimeAgo(comment.publishedAt)}
                           </div>
                         </div>
                       </div>
                     </div>
-                    
+
                     <p className="text-foreground">{comment.content}</p>
-                    
+
                     <div className="flex items-center space-x-4">
                       <Button variant="ghost" size="sm">
                         <Heart className="w-4 h-4 mr-1" />
@@ -463,23 +509,36 @@ export default function BlogDetail() {
                     {/* Replies */}
                     {comment.replies && comment.replies.length > 0 && (
                       <div className="ml-8 space-y-4 border-l-2 border-muted pl-4">
-                        {comment.replies.map(reply => (
+                        {comment.replies.map((reply) => (
                           <div key={reply.id} className="space-y-2">
                             <div className="flex items-center space-x-3">
                               <Avatar className="w-8 h-8">
                                 <AvatarImage src={reply.author.avatar} />
-                                <AvatarFallback>{reply.author.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                <AvatarFallback>
+                                  {reply.author.name
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .join("")}
+                                </AvatarFallback>
                               </Avatar>
                               <div>
-                                <div className="font-medium text-sm text-foreground">{reply.author.name}</div>
+                                <div className="font-medium text-sm text-foreground">
+                                  {reply.author.name}
+                                </div>
                                 <div className="text-xs text-muted-foreground">
                                   {formatTimeAgo(reply.publishedAt)}
                                 </div>
                               </div>
                             </div>
-                            <p className="text-sm text-foreground">{reply.content}</p>
+                            <p className="text-sm text-foreground">
+                              {reply.content}
+                            </p>
                             <div className="flex items-center space-x-4">
-                              <Button variant="ghost" size="sm" className="text-xs">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="text-xs"
+                              >
                                 <Heart className="w-3 h-3 mr-1" />
                                 {reply.likes}
                               </Button>

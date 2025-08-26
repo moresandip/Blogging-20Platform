@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Search, PenTool, User, Menu, Bell, LogOut, Shield } from "lucide-react";
+import {
+  Search,
+  PenTool,
+  User,
+  Menu,
+  Bell,
+  LogOut,
+  Shield,
+} from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
@@ -10,7 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuTrigger
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,33 +31,33 @@ export default function Header() {
 
   const handleLogout = async () => {
     await logout();
-    navigate('/');
+    navigate("/");
   };
 
   const isActive = (path: string) => location.pathname === path;
 
   const NavLinks = () => (
     <>
-      <Link 
-        to="/blogs" 
+      <Link
+        to="/blogs"
         className={`text-sm font-medium transition-colors hover:text-primary ${
-          isActive('/blogs') ? 'text-primary' : 'text-muted-foreground'
+          isActive("/blogs") ? "text-primary" : "text-muted-foreground"
         }`}
       >
         Explore
       </Link>
-      <Link 
-        to="/categories" 
+      <Link
+        to="/categories"
         className={`text-sm font-medium transition-colors hover:text-primary ${
-          isActive('/categories') ? 'text-primary' : 'text-muted-foreground'
+          isActive("/categories") ? "text-primary" : "text-muted-foreground"
         }`}
       >
         Categories
       </Link>
-      <Link 
-        to="/about" 
+      <Link
+        to="/about"
         className={`text-sm font-medium transition-colors hover:text-primary ${
-          isActive('/about') ? 'text-primary' : 'text-muted-foreground'
+          isActive("/about") ? "text-primary" : "text-muted-foreground"
         }`}
       >
         About
@@ -75,9 +83,11 @@ export default function Header() {
 
         {/* Search Bar */}
         <div className="hidden lg:flex flex-1 max-w-md mx-8">
-          <div className={`relative w-full transition-all duration-200 ${
-            isSearchFocused ? 'scale-105' : ''
-          }`}>
+          <div
+            className={`relative w-full transition-all duration-200 ${
+              isSearchFocused ? "scale-105" : ""
+            }`}
+          >
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               type="text"
@@ -93,7 +103,11 @@ export default function Header() {
         <div className="flex items-center space-x-3">
           {isAuthenticated ? (
             <>
-              <Button variant="ghost" size="icon" className="hidden md:flex relative">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden md:flex relative"
+              >
                 <Bell className="w-4 h-4" />
                 <Badge className="absolute -top-1 -right-1 w-5 h-5 p-0 flex items-center justify-center text-xs bg-primary">
                   3
@@ -109,17 +123,27 @@ export default function Header() {
 
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                  <Button
+                    variant="ghost"
+                    className="relative h-8 w-8 rounded-full"
+                  >
                     <Avatar className="h-8 w-8">
                       <AvatarImage src={user?.avatar} alt={user?.name} />
-                      <AvatarFallback>{user?.name?.split(' ').map(n => n[0]).join('') || 'U'}</AvatarFallback>
+                      <AvatarFallback>
+                        {user?.name
+                          ?.split(" ")
+                          .map((n) => n[0])
+                          .join("") || "U"}
+                      </AvatarFallback>
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent className="w-56" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-medium leading-none">{user?.name}</p>
+                      <p className="text-sm font-medium leading-none">
+                        {user?.name}
+                      </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {user?.email}
                       </p>
@@ -132,7 +156,7 @@ export default function Header() {
                       <span>Profile</span>
                     </Link>
                   </DropdownMenuItem>
-                  {user?.role === 'admin' && (
+                  {user?.role === "admin" && (
                     <DropdownMenuItem asChild>
                       <Link to="/admin">
                         <Shield className="mr-2 h-4 w-4" />
@@ -176,7 +200,7 @@ export default function Header() {
                     className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-border rounded-full text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
                   />
                 </div>
-                
+
                 <nav className="flex flex-col space-y-4">
                   <NavLinks />
                 </nav>
@@ -190,20 +214,29 @@ export default function Header() {
                           Write Article
                         </Button>
                       </Link>
-                      <Button variant="outline" className="w-full justify-start">
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start"
+                      >
                         <Bell className="w-4 h-4 mr-2" />
                         Notifications
                         <Badge className="ml-auto">3</Badge>
                       </Button>
                       <Link to="/profile">
-                        <Button variant="outline" className="w-full justify-start">
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start"
+                        >
                           <User className="w-4 h-4 mr-2" />
                           Profile
                         </Button>
                       </Link>
-                      {user?.role === 'admin' && (
+                      {user?.role === "admin" && (
                         <Link to="/admin">
-                          <Button variant="outline" className="w-full justify-start">
+                          <Button
+                            variant="outline"
+                            className="w-full justify-start"
+                          >
                             <Shield className="w-4 h-4 mr-2" />
                             Admin Dashboard
                           </Button>
@@ -226,9 +259,7 @@ export default function Header() {
                         </Button>
                       </Link>
                       <Link to="/register">
-                        <Button className="w-full">
-                          Sign Up
-                        </Button>
+                        <Button className="w-full">Sign Up</Button>
                       </Link>
                     </>
                   )}

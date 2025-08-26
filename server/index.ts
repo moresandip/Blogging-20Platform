@@ -7,25 +7,25 @@ import {
   getBlogById,
   createBlog,
   toggleBlogLike,
-  toggleBlogBookmark
+  toggleBlogBookmark,
 } from "./routes/blogs";
 import {
   getBlogComments,
   addComment,
-  toggleCommentLike
+  toggleCommentLike,
 } from "./routes/comments";
 import {
   login,
   register,
   logout,
   getCurrentUser,
-  createUser
+  createUser,
 } from "./routes/auth";
 import {
   getAllUsers,
   getAdminStats,
   deleteUser,
-  updateUserRole
+  updateUserRole,
 } from "./routes/admin";
 
 export function createServer() {

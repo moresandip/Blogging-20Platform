@@ -5,7 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
@@ -25,21 +31,26 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { 
-  Users, 
-  FileText, 
-  MessageCircle, 
-  Heart, 
-  Plus, 
-  Search, 
-  MoreHorizontal, 
-  Trash2, 
+import {
+  Users,
+  FileText,
+  MessageCircle,
+  Heart,
+  Plus,
+  Search,
+  MoreHorizontal,
+  Trash2,
   Shield,
   Calendar,
-  TrendingUp
+  TrendingUp,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { User, AdminStatsResponse, UserListResponse, CreateUserRequest } from "@shared/api";
+import {
+  User,
+  AdminStatsResponse,
+  UserListResponse,
+  CreateUserRequest,
+} from "@shared/api";
 import Header from "@/components/Header";
 
 export default function AdminDashboard() {
@@ -58,7 +69,7 @@ export default function AdminDashboard() {
     email: "",
     password: "",
     role: "user",
-    bio: ""
+    bio: "",
   });
   const [createUserLoading, setCreateUserLoading] = useState(false);
   const [createUserError, setCreateUserError] = useState<string | null>(null);
@@ -66,47 +77,47 @@ export default function AdminDashboard() {
   // Fetch admin stats
   const fetchStats = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/admin/stats', {
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("/api/admin/stats", {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         const data = await response.json();
         setStats(data);
       } else {
-        throw new Error('Failed to fetch admin stats');
+        throw new Error("Failed to fetch admin stats");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch stats');
+      setError(err instanceof Error ? err.message : "Failed to fetch stats");
     }
   };
 
   // Fetch users
   const fetchUsers = async () => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       const params = new URLSearchParams();
-      
-      if (userSearch) params.append('search', userSearch);
-      if (userRoleFilter !== 'all') params.append('role', userRoleFilter);
-      
+
+      if (userSearch) params.append("search", userSearch);
+      if (userRoleFilter !== "all") params.append("role", userRoleFilter);
+
       const response = await fetch(`/api/admin/users?${params}`, {
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
         const data: UserListResponse = await response.json();
         setUsers(data.users);
       } else {
-        throw new Error('Failed to fetch users');
+        throw new Error("Failed to fetch users");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch users');
+      setError(err instanceof Error ? err.message : "Failed to fetch users");
     }
   };
 
@@ -117,14 +128,14 @@ export default function AdminDashboard() {
     setCreateUserError(null);
 
     try {
-      const token = localStorage.getItem('auth_token');
-      const response = await fetch('/api/admin/users', {
-        method: 'POST',
+      const token = localStorage.getItem("auth_token");
+      const response = await fetch("/api/admin/users", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify(createUserForm)
+        body: JSON.stringify(createUserForm),
       });
 
       if (response.ok) {
@@ -134,16 +145,18 @@ export default function AdminDashboard() {
           email: "",
           password: "",
           role: "user",
-          bio: ""
+          bio: "",
         });
         await fetchUsers();
         await fetchStats();
       } else {
         const error = await response.json();
-        throw new Error(error.message || 'Failed to create user');
+        throw new Error(error.message || "Failed to create user");
       }
     } catch (err) {
-      setCreateUserError(err instanceof Error ? err.message : 'Failed to create user');
+      setCreateUserError(
+        err instanceof Error ? err.message : "Failed to create user",
+      );
     } finally {
       setCreateUserLoading(false);
     }
@@ -151,15 +164,15 @@ export default function AdminDashboard() {
 
   // Delete user
   const handleDeleteUser = async (userId: number) => {
-    if (!confirm('Are you sure you want to delete this user?')) return;
+    if (!confirm("Are you sure you want to delete this user?")) return;
 
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       const response = await fetch(`/api/admin/users/${userId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
-          'Authorization': `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       if (response.ok) {
@@ -167,34 +180,37 @@ export default function AdminDashboard() {
         await fetchStats();
       } else {
         const error = await response.json();
-        alert(error.message || 'Failed to delete user');
+        alert(error.message || "Failed to delete user");
       }
     } catch (err) {
-      alert('Failed to delete user');
+      alert("Failed to delete user");
     }
   };
 
   // Update user role
-  const handleUpdateUserRole = async (userId: number, newRole: "admin" | "user") => {
+  const handleUpdateUserRole = async (
+    userId: number,
+    newRole: "admin" | "user",
+  ) => {
     try {
-      const token = localStorage.getItem('auth_token');
+      const token = localStorage.getItem("auth_token");
       const response = await fetch(`/api/admin/users/${userId}/role`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ role: newRole })
+        body: JSON.stringify({ role: newRole }),
       });
 
       if (response.ok) {
         await fetchUsers();
       } else {
         const error = await response.json();
-        alert(error.message || 'Failed to update user role');
+        alert(error.message || "Failed to update user role");
       }
     } catch (err) {
-      alert('Failed to update user role');
+      alert("Failed to update user role");
     }
   };
 
@@ -213,7 +229,7 @@ export default function AdminDashboard() {
   }, [userSearch, userRoleFilter]);
 
   // Check if user is admin
-  if (!user || user.role !== 'admin') {
+  if (!user || user.role !== "admin") {
     return (
       <div className="min-h-screen bg-background">
         <Header />
@@ -245,12 +261,16 @@ export default function AdminDashboard() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto max-w-7xl px-4 py-8">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-4xl font-bold text-foreground mb-2">Admin Dashboard</h1>
-          <p className="text-muted-foreground text-lg">Manage users, posts, and platform settings</p>
+          <h1 className="text-4xl font-bold text-foreground mb-2">
+            Admin Dashboard
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Manage users, posts, and platform settings
+          </p>
         </div>
 
         {error && (
@@ -267,7 +287,9 @@ export default function AdminDashboard() {
                 <div className="flex items-center">
                   <Users className="w-8 h-8 text-primary" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Users</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Users
+                    </p>
                     <p className="text-2xl font-bold">{stats.totalUsers}</p>
                   </div>
                 </div>
@@ -279,7 +301,9 @@ export default function AdminDashboard() {
                 <div className="flex items-center">
                   <FileText className="w-8 h-8 text-primary" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Posts</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Posts
+                    </p>
                     <p className="text-2xl font-bold">{stats.totalPosts}</p>
                   </div>
                 </div>
@@ -291,7 +315,9 @@ export default function AdminDashboard() {
                 <div className="flex items-center">
                   <MessageCircle className="w-8 h-8 text-primary" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Comments</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Comments
+                    </p>
                     <p className="text-2xl font-bold">{stats.totalComments}</p>
                   </div>
                 </div>
@@ -303,7 +329,9 @@ export default function AdminDashboard() {
                 <div className="flex items-center">
                   <Heart className="w-8 h-8 text-primary" />
                   <div className="ml-4">
-                    <p className="text-sm font-medium text-muted-foreground">Total Likes</p>
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Total Likes
+                    </p>
                     <p className="text-2xl font-bold">{stats.totalLikes}</p>
                   </div>
                 </div>
@@ -325,7 +353,10 @@ export default function AdminDashboard() {
               <CardHeader>
                 <div className="flex items-center justify-between">
                   <CardTitle>User Management</CardTitle>
-                  <Dialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen}>
+                  <Dialog
+                    open={isCreateUserOpen}
+                    onOpenChange={setIsCreateUserOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button>
                         <Plus className="w-4 h-4 mr-2" />
@@ -339,7 +370,7 @@ export default function AdminDashboard() {
                           Add a new user to the platform
                         </DialogDescription>
                       </DialogHeader>
-                      
+
                       {createUserError && (
                         <Alert variant="destructive">
                           <AlertDescription>{createUserError}</AlertDescription>
@@ -353,7 +384,12 @@ export default function AdminDashboard() {
                             <Input
                               id="name"
                               value={createUserForm.name}
-                              onChange={(e) => setCreateUserForm(prev => ({ ...prev, name: e.target.value }))}
+                              onChange={(e) =>
+                                setCreateUserForm((prev) => ({
+                                  ...prev,
+                                  name: e.target.value,
+                                }))
+                              }
                               required
                             />
                           </div>
@@ -363,12 +399,17 @@ export default function AdminDashboard() {
                               id="email"
                               type="email"
                               value={createUserForm.email}
-                              onChange={(e) => setCreateUserForm(prev => ({ ...prev, email: e.target.value }))}
+                              onChange={(e) =>
+                                setCreateUserForm((prev) => ({
+                                  ...prev,
+                                  email: e.target.value,
+                                }))
+                              }
                               required
                             />
                           </div>
                         </div>
-                        
+
                         <div className="grid grid-cols-2 gap-4">
                           <div className="space-y-2">
                             <Label htmlFor="password">Password</Label>
@@ -376,15 +417,25 @@ export default function AdminDashboard() {
                               id="password"
                               type="password"
                               value={createUserForm.password}
-                              onChange={(e) => setCreateUserForm(prev => ({ ...prev, password: e.target.value }))}
+                              onChange={(e) =>
+                                setCreateUserForm((prev) => ({
+                                  ...prev,
+                                  password: e.target.value,
+                                }))
+                              }
                               required
                             />
                           </div>
                           <div className="space-y-2">
                             <Label htmlFor="role">Role</Label>
-                            <Select 
-                              value={createUserForm.role} 
-                              onValueChange={(value: "admin" | "user") => setCreateUserForm(prev => ({ ...prev, role: value }))}
+                            <Select
+                              value={createUserForm.role}
+                              onValueChange={(value: "admin" | "user") =>
+                                setCreateUserForm((prev) => ({
+                                  ...prev,
+                                  role: value,
+                                }))
+                              }
                             >
                               <SelectTrigger>
                                 <SelectValue />
@@ -402,12 +453,21 @@ export default function AdminDashboard() {
                           <Input
                             id="bio"
                             value={createUserForm.bio}
-                            onChange={(e) => setCreateUserForm(prev => ({ ...prev, bio: e.target.value }))}
+                            onChange={(e) =>
+                              setCreateUserForm((prev) => ({
+                                ...prev,
+                                bio: e.target.value,
+                              }))
+                            }
                           />
                         </div>
 
                         <DialogFooter>
-                          <Button type="button" variant="outline" onClick={() => setIsCreateUserOpen(false)}>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => setIsCreateUserOpen(false)}
+                          >
                             Cancel
                           </Button>
                           <Button type="submit" disabled={createUserLoading}>
@@ -419,7 +479,7 @@ export default function AdminDashboard() {
                   </Dialog>
                 </div>
               </CardHeader>
-              
+
               <CardContent>
                 {/* Filters */}
                 <div className="flex gap-4 mb-6">
@@ -434,7 +494,10 @@ export default function AdminDashboard() {
                       />
                     </div>
                   </div>
-                  <Select value={userRoleFilter} onValueChange={setUserRoleFilter}>
+                  <Select
+                    value={userRoleFilter}
+                    onValueChange={setUserRoleFilter}
+                  >
                     <SelectTrigger className="w-[180px]">
                       <SelectValue placeholder="Filter by role" />
                     </SelectTrigger>
@@ -465,17 +528,30 @@ export default function AdminDashboard() {
                           <div className="flex items-center space-x-3">
                             <Avatar className="w-8 h-8">
                               <AvatarImage src={userItem.avatar} />
-                              <AvatarFallback>{userItem.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              <AvatarFallback>
+                                {userItem.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
                             </Avatar>
                             <div>
                               <div className="font-medium">{userItem.name}</div>
-                              <div className="text-sm text-muted-foreground">{userItem.bio}</div>
+                              <div className="text-sm text-muted-foreground">
+                                {userItem.bio}
+                              </div>
                             </div>
                           </div>
                         </TableCell>
                         <TableCell>{userItem.email}</TableCell>
                         <TableCell>
-                          <Badge variant={userItem.role === 'admin' ? 'default' : 'secondary'}>
+                          <Badge
+                            variant={
+                              userItem.role === "admin"
+                                ? "default"
+                                : "secondary"
+                            }
+                          >
                             {userItem.role}
                           </Badge>
                         </TableCell>
@@ -490,10 +566,14 @@ export default function AdminDashboard() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => handleUpdateUserRole(
-                                    userItem.id, 
-                                    userItem.role === 'admin' ? 'user' : 'admin'
-                                  )}
+                                  onClick={() =>
+                                    handleUpdateUserRole(
+                                      userItem.id,
+                                      userItem.role === "admin"
+                                        ? "user"
+                                        : "admin",
+                                    )
+                                  }
                                 >
                                   <Shield className="w-4 h-4" />
                                 </Button>
@@ -523,7 +603,9 @@ export default function AdminDashboard() {
                 <CardTitle>Post Management</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">Post management features coming soon...</p>
+                <p className="text-muted-foreground">
+                  Post management features coming soon...
+                </p>
               </CardContent>
             </Card>
           </TabsContent>
@@ -540,18 +622,37 @@ export default function AdminDashboard() {
                     <CardContent>
                       <div className="space-y-4">
                         {stats.recentUsers.map((recentUser) => (
-                          <div key={recentUser.id} className="flex items-center space-x-3">
+                          <div
+                            key={recentUser.id}
+                            className="flex items-center space-x-3"
+                          >
                             <Avatar className="w-10 h-10">
                               <AvatarImage src={recentUser.avatar} />
-                              <AvatarFallback>{recentUser.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                              <AvatarFallback>
+                                {recentUser.name
+                                  .split(" ")
+                                  .map((n) => n[0])
+                                  .join("")}
+                              </AvatarFallback>
                             </Avatar>
                             <div className="flex-1">
-                              <div className="font-medium">{recentUser.name}</div>
+                              <div className="font-medium">
+                                {recentUser.name}
+                              </div>
                               <div className="text-sm text-muted-foreground">
-                                Joined {new Date(recentUser.createdAt).toLocaleDateString()}
+                                Joined{" "}
+                                {new Date(
+                                  recentUser.createdAt,
+                                ).toLocaleDateString()}
                               </div>
                             </div>
-                            <Badge variant={recentUser.role === 'admin' ? 'default' : 'secondary'}>
+                            <Badge
+                              variant={
+                                recentUser.role === "admin"
+                                  ? "default"
+                                  : "secondary"
+                              }
+                            >
                               {recentUser.role}
                             </Badge>
                           </div>
@@ -568,10 +669,16 @@ export default function AdminDashboard() {
                       <div className="space-y-4">
                         {stats.recentPosts.map((post) => (
                           <div key={post.id} className="space-y-2">
-                            <div className="font-medium line-clamp-2">{post.title}</div>
+                            <div className="font-medium line-clamp-2">
+                              {post.title}
+                            </div>
                             <div className="flex items-center justify-between text-sm text-muted-foreground">
                               <span>by {post.author.name}</span>
-                              <span>{new Date(post.publishedAt).toLocaleDateString()}</span>
+                              <span>
+                                {new Date(
+                                  post.publishedAt,
+                                ).toLocaleDateString()}
+                              </span>
                             </div>
                           </div>
                         ))}

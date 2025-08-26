@@ -10,11 +10,15 @@ interface PlaceholderPageProps {
   suggestedPrompt?: string;
 }
 
-export default function PlaceholderPage({ title, description, suggestedPrompt }: PlaceholderPageProps) {
+export default function PlaceholderPage({
+  title,
+  description,
+  suggestedPrompt,
+}: PlaceholderPageProps) {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      
+
       <div className="container mx-auto max-w-4xl px-4 py-16">
         <Card className="text-center">
           <CardContent className="p-12">
@@ -23,15 +27,17 @@ export default function PlaceholderPage({ title, description, suggestedPrompt }:
                 <Construction className="w-8 h-8 text-primary" />
               </div>
             </div>
-            
+
             <h1 className="text-3xl font-bold text-foreground mb-4">{title}</h1>
             <p className="text-muted-foreground text-lg mb-8 max-w-2xl mx-auto">
               {description}
             </p>
-            
+
             {suggestedPrompt && (
               <div className="bg-muted/50 rounded-lg p-6 mb-8">
-                <h3 className="font-semibold text-foreground mb-2">Continue Building</h3>
+                <h3 className="font-semibold text-foreground mb-2">
+                  Continue Building
+                </h3>
                 <p className="text-sm text-muted-foreground mb-4">
                   To implement this page, you can prompt:
                 </p>
@@ -40,7 +46,7 @@ export default function PlaceholderPage({ title, description, suggestedPrompt }:
                 </div>
               </div>
             )}
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Link to="/">
                 <Button>
@@ -49,9 +55,7 @@ export default function PlaceholderPage({ title, description, suggestedPrompt }:
                 </Button>
               </Link>
               <Link to="/blogs">
-                <Button variant="outline">
-                  Explore Articles
-                </Button>
+                <Button variant="outline">Explore Articles</Button>
               </Link>
             </div>
           </CardContent>

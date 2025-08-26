@@ -1,11 +1,11 @@
 import { RequestHandler } from "express";
-import { 
-  BlogPost, 
-  BlogListResponse, 
-  BlogDetailResponse, 
-  CreateBlogRequest, 
+import {
+  BlogPost,
+  BlogListResponse,
+  BlogDetailResponse,
+  CreateBlogRequest,
   CreateBlogResponse,
-  Author 
+  Author,
 } from "@shared/api";
 
 // Mock data - replace with actual database operations
@@ -15,14 +15,15 @@ const mockAuthor: Author = {
   avatar: "/placeholder.svg",
   bio: "Passionate writer and developer",
   followers: 150,
-  articles: 12
+  articles: 12,
 };
 
 let mockBlogs: BlogPost[] = [
   {
     id: 1,
     title: "The Future of Web Development: What to Expect in 2024",
-    excerpt: "Explore the latest trends, technologies, and frameworks that are shaping the future of web development. From AI integration to serverless architecture, discover what's coming next.",
+    excerpt:
+      "Explore the latest trends, technologies, and frameworks that are shaping the future of web development. From AI integration to serverless architecture, discover what's coming next.",
     content: `
       <div class="prose max-w-none">
         <p class="text-lg text-muted-foreground mb-6">Web development continues to evolve at a rapid pace, with new technologies and methodologies emerging regularly. As we move through 2024, several key trends are shaping the future of how we build and interact with web applications.</p>
@@ -60,7 +61,7 @@ let mockBlogs: BlogPost[] = [
       avatar: "/placeholder.svg",
       bio: "Senior Full Stack Developer at TechCorp",
       followers: 1250,
-      articles: 45
+      articles: 45,
     },
     publishedAt: "2024-01-15T10:30:00Z",
     updatedAt: "2024-01-15T14:20:00Z",
@@ -74,18 +75,19 @@ let mockBlogs: BlogPost[] = [
     comments: 45,
     views: 3200,
     featured: true,
-    status: "published"
+    status: "published",
   },
   {
     id: 2,
     title: "Mastering React Server Components",
-    excerpt: "A comprehensive guide to understanding and implementing React Server Components in your applications. Learn the benefits, challenges, and best practices.",
+    excerpt:
+      "A comprehensive guide to understanding and implementing React Server Components in your applications. Learn the benefits, challenges, and best practices.",
     content: "<p>Detailed content about React Server Components...</p>",
     author: {
       id: 2,
       name: "Alex Rodriguez",
       avatar: "/placeholder.svg",
-      bio: "React Developer"
+      bio: "React Developer",
     },
     publishedAt: "2024-01-14T09:15:00Z",
     readTime: "6 min read",
@@ -97,18 +99,19 @@ let mockBlogs: BlogPost[] = [
     isBookmarked: false,
     comments: 32,
     views: 2100,
-    status: "published"
+    status: "published",
   },
   {
     id: 3,
     title: "Building Scalable APIs with Node.js",
-    excerpt: "Learn how to design and build APIs that can handle millions of requests. Best practices for performance, security, and maintainability.",
+    excerpt:
+      "Learn how to design and build APIs that can handle millions of requests. Best practices for performance, security, and maintainability.",
     content: "<p>Detailed content about Node.js APIs...</p>",
     author: {
       id: 3,
       name: "Emma Thompson",
       avatar: "/placeholder.svg",
-      bio: "Backend Engineer"
+      bio: "Backend Engineer",
     },
     publishedAt: "2024-01-13T14:30:00Z",
     readTime: "10 min read",
@@ -120,8 +123,8 @@ let mockBlogs: BlogPost[] = [
     isBookmarked: false,
     comments: 28,
     views: 1800,
-    status: "published"
-  }
+    status: "published",
+  },
 ];
 
 let nextId = 4;
@@ -129,7 +132,7 @@ let nextId = 4;
 // Calculate read time based on content
 const calculateReadTime = (content: string): string => {
   const wordsPerMinute = 200;
-  const textContent = content.replace(/<[^>]*>/g, '');
+  const textContent = content.replace(/<[^>]*>/g, "");
   const wordCount = textContent.split(/\s+/).length;
   const readTime = Math.ceil(wordCount / wordsPerMinute);
   return `${readTime} min read`;
@@ -138,44 +141,49 @@ const calculateReadTime = (content: string): string => {
 // GET /api/blogs - List all blogs with filtering and pagination
 export const getAllBlogs: RequestHandler = (req, res) => {
   try {
-    const { 
-      page = 1, 
-      pageSize = 10, 
-      category, 
-      search, 
-      sortBy = 'latest' 
+    const {
+      page = 1,
+      pageSize = 10,
+      category,
+      search,
+      sortBy = "latest",
     } = req.query;
 
-    let filteredBlogs = mockBlogs.filter(blog => blog.status === 'published');
+    let filteredBlogs = mockBlogs.filter((blog) => blog.status === "published");
 
     // Filter by category
-    if (category && category !== 'All') {
-      filteredBlogs = filteredBlogs.filter(blog => 
-        blog.category.toLowerCase() === (category as string).toLowerCase()
+    if (category && category !== "All") {
+      filteredBlogs = filteredBlogs.filter(
+        (blog) =>
+          blog.category.toLowerCase() === (category as string).toLowerCase(),
       );
     }
 
     // Filter by search term
     if (search) {
       const searchTerm = (search as string).toLowerCase();
-      filteredBlogs = filteredBlogs.filter(blog =>
-        blog.title.toLowerCase().includes(searchTerm) ||
-        blog.excerpt.toLowerCase().includes(searchTerm) ||
-        blog.author.name.toLowerCase().includes(searchTerm) ||
-        blog.tags.some(tag => tag.toLowerCase().includes(searchTerm))
+      filteredBlogs = filteredBlogs.filter(
+        (blog) =>
+          blog.title.toLowerCase().includes(searchTerm) ||
+          blog.excerpt.toLowerCase().includes(searchTerm) ||
+          blog.author.name.toLowerCase().includes(searchTerm) ||
+          blog.tags.some((tag) => tag.toLowerCase().includes(searchTerm)),
       );
     }
 
     // Sort blogs
     filteredBlogs.sort((a, b) => {
       switch (sortBy) {
-        case 'popular':
+        case "popular":
           return b.likes - a.likes;
-        case 'comments':
+        case "comments":
           return b.comments - a.comments;
-        case 'latest':
+        case "latest":
         default:
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime();
+          return (
+            new Date(b.publishedAt).getTime() -
+            new Date(a.publishedAt).getTime()
+          );
       }
     });
 
@@ -190,13 +198,13 @@ export const getAllBlogs: RequestHandler = (req, res) => {
       blogs: paginatedBlogs,
       total: filteredBlogs.length,
       page: pageNum,
-      pageSize: pageSizeNum
+      pageSize: pageSizeNum,
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching blogs:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching blogs:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -204,10 +212,10 @@ export const getAllBlogs: RequestHandler = (req, res) => {
 export const getBlogById: RequestHandler = (req, res) => {
   try {
     const blogId = parseInt(req.params.id);
-    const blog = mockBlogs.find(b => b.id === blogId);
+    const blog = mockBlogs.find((b) => b.id === blogId);
 
     if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found' });
+      return res.status(404).json({ error: "Blog post not found" });
     }
 
     // Increment view count
@@ -215,13 +223,13 @@ export const getBlogById: RequestHandler = (req, res) => {
 
     const response: BlogDetailResponse = {
       blog,
-      comments: [] // Comments will be handled separately
+      comments: [], // Comments will be handled separately
     };
 
     res.json(response);
   } catch (error) {
-    console.error('Error fetching blog:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error fetching blog:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -231,42 +239,48 @@ export const createBlog: RequestHandler = (req, res) => {
     const blogData: CreateBlogRequest = req.body;
 
     if (!blogData.title || !blogData.content || !blogData.category) {
-      return res.status(400).json({ 
-        error: 'Missing required fields',
-        message: 'Title, content, and category are required'
+      return res.status(400).json({
+        error: "Missing required fields",
+        message: "Title, content, and category are required",
       });
     }
 
     const newBlog: BlogPost = {
       id: nextId++,
       title: blogData.title,
-      excerpt: blogData.excerpt || blogData.content.replace(/<[^>]*>/g, '').substring(0, 200) + '...',
+      excerpt:
+        blogData.excerpt ||
+        blogData.content.replace(/<[^>]*>/g, "").substring(0, 200) + "...",
       content: blogData.content,
       author: mockAuthor,
-      publishedAt: blogData.publishType === 'publish' ? new Date().toISOString() : '',
+      publishedAt:
+        blogData.publishType === "publish" ? new Date().toISOString() : "",
       readTime: calculateReadTime(blogData.content),
       category: blogData.category,
       tags: blogData.tags || [],
-      imageUrl: blogData.imageUrl || '/placeholder.svg',
+      imageUrl: blogData.imageUrl || "/placeholder.svg",
       likes: 0,
       isLiked: false,
       isBookmarked: false,
       comments: 0,
       views: 0,
-      status: blogData.publishType === 'publish' ? 'published' : 'draft'
+      status: blogData.publishType === "publish" ? "published" : "draft",
     };
 
     mockBlogs.unshift(newBlog);
 
     const response: CreateBlogResponse = {
       blog: newBlog,
-      message: blogData.publishType === 'publish' ? 'Blog published successfully!' : 'Blog saved as draft!'
+      message:
+        blogData.publishType === "publish"
+          ? "Blog published successfully!"
+          : "Blog saved as draft!",
     };
 
     res.status(201).json(response);
   } catch (error) {
-    console.error('Error creating blog:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error creating blog:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -274,23 +288,23 @@ export const createBlog: RequestHandler = (req, res) => {
 export const toggleBlogLike: RequestHandler = (req, res) => {
   try {
     const blogId = parseInt(req.params.id);
-    const blog = mockBlogs.find(b => b.id === blogId);
+    const blog = mockBlogs.find((b) => b.id === blogId);
 
     if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found' });
+      return res.status(404).json({ error: "Blog post not found" });
     }
 
     blog.isLiked = !blog.isLiked;
     blog.likes += blog.isLiked ? 1 : -1;
 
-    res.json({ 
-      isLiked: blog.isLiked, 
+    res.json({
+      isLiked: blog.isLiked,
       likes: blog.likes,
-      message: blog.isLiked ? 'Blog liked!' : 'Blog unliked!'
+      message: blog.isLiked ? "Blog liked!" : "Blog unliked!",
     });
   } catch (error) {
-    console.error('Error toggling like:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error toggling like:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
@@ -298,21 +312,21 @@ export const toggleBlogLike: RequestHandler = (req, res) => {
 export const toggleBlogBookmark: RequestHandler = (req, res) => {
   try {
     const blogId = parseInt(req.params.id);
-    const blog = mockBlogs.find(b => b.id === blogId);
+    const blog = mockBlogs.find((b) => b.id === blogId);
 
     if (!blog) {
-      return res.status(404).json({ error: 'Blog post not found' });
+      return res.status(404).json({ error: "Blog post not found" });
     }
 
     blog.isBookmarked = !blog.isBookmarked;
 
     res.json({
       isBookmarked: blog.isBookmarked,
-      message: blog.isBookmarked ? 'Blog bookmarked!' : 'Bookmark removed!'
+      message: blog.isBookmarked ? "Blog bookmarked!" : "Bookmark removed!",
     });
   } catch (error) {
-    console.error('Error toggling bookmark:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    console.error("Error toggling bookmark:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 };
 
